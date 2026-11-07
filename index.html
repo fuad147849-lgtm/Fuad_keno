@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUADX KENO</title>
+<style>
+body{background:#10131d;color:white;font-family:Arial;text-align:center;padding:15px}
+h1{color:#f5c542}
+#numbers{display:grid;grid-template-columns:repeat(8,1fr);gap:7px;max-width:500px;margin:20px auto}
+button{padding:12px 3px;border:0;border-radius:8px;background:#30384b;color:white;font-weight:bold}
+button.selected{background:#e6ad24;color:#111}
+.draw{background:#16a36a;padding:14px 25px;margin:15px;font-size:17px}
+#result{margin:20px;color:#f5c542;font-size:18px}
+</style>
+</head>
+<body>
+<h1>FUADX KENO</h1>
+<p>Choose up to 10 numbers (1–80)</p>
+<div id="numbers"></div>
+<button class="draw" onclick="draw()">DRAW 20 NUMBERS</button>
+<div id="result">Your game starts here!</div>
+<script>
+let chosen=[];
+let box=document.getElementById("numbers");
+for(let i=1;i<=80;i++){
+let b=document.createElement("button");
+b.textContent=i;
+b.onclick=()=>{
+if(chosen.includes(i)){
+chosen=chosen.filter(n=>n!==i);
+b.classList.remove("selected");
+}else if(chosen.length<10){
+chosen.push(i);
+b.classList.add("selected");
+}
+};
+box.appendChild(b);
+}
+function draw(){
+if(chosen.length===0){alert("Choose at least one number!");return;}
+let pool=Array.from({length:80},(_,i)=>i+1);
+pool.sort(()=>Math.random()-0.5);
+let result=pool.slice(0,20);
+let matches=chosen.filter(n=>result.includes(n));
+document.getElementById("result").innerHTML=
+"Drawn numbers: "+result.sort((a,b)=>a-b).join(", ")+"<br><br>Matches: "+matches.length+"<br>Matched: "+(matches.join(", ")||"None");
+}
+</script>
+</body>
+</html> 
