@@ -54,7 +54,30 @@ const timer = setInterval(function() {
   document.getElementById("timer").innerText = timeLeft;
   if (timeLeft <= 0) {
     clearInterval(timer);
+    startDraw();
   }
 }, 1000);
-</script><div id="timer">60</div></body>
+let drawn = [];
+let index = 0;
+
+function startDraw() {
+  drawn = [];
+  index = 0;
+
+  while (drawn.length < 20) {
+    let n = Math.floor(Math.random() * 80) + 1;
+    if (!drawn.includes(n)) drawn.push(n);
+  }
+
+  showNext();
+}
+
+function showNext() {
+  if (index < 20) {
+    document.getElementById("result").innerHTML +=
+      drawn[index] + "<br>";
+    index++;
+    setTimeout(showNext, 1000);
+  }
+}</script><div id="timer">60</div><div id="result"></div></body>
 </html> 
