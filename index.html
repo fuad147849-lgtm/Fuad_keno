@@ -25,7 +25,13 @@ button{padding:12px;border:0;border-radius:8px;background:#30384b;color:white;fo
 
 <h2>Choose Your Numbers</h2>
 <p>Select 1 to 10 numbers</p>
-<div id="numbers"></div>
+<h2>የዙር ቆጣሪ</h2>
+<h1 id="timer">60</h1>
+
+<h2>የተሳሉ ቁጥሮች (Drawn Numbers)</h2>
+<div id="drawBox" style="background:#30384b;padding:20px;border-radius:12px;min-height:50px;font-size:24px;color:#f5c542">
+በመጠባበቅ ላይ...
+</div><div id="numbers"></div>
 <p id="selectedCount">Selected: 0/10</p>
 <button onclick="saveTicket()">Save Ticket</button>
 <h3>My Tickets</h3>
@@ -116,50 +122,94 @@ playerList.push(name);
 }
 </script>
 
-<h2>Round Timer</h2>
-<h1 id="timer">60</h1>
-<h2>Drawn Numbers</h2>
-<div id="drawBox" style="background:#30384b;padding:20px;border-radius:12px;min-height:50px;font-size:24px;color:#f5c542">
-Waiting...
-</div>
-
 <script>
 let timeLeft = 60;
 let drawNumbers = [];
 let drawIndex = 0;
+let countdown;
 
-let countdown = setInterval(function(){
-  timeLeft--;
-  document.getElementById("timer").textContent = timeLeft;
+function startRound(){
+  clearInterval(countdown);
 
-  if(timeLeft <= 0){
-    clearInterval(countdown);
+  timeLeft = 60;
+  drawNumbers = [];
+  drawIndex = 0;
+  selectedNumbers = [];
+  myTickets = [];
 
-    document.querySelectorAll("#numbers button").forEach(b=>{
-      b.disabled = true;
-    });
+  document.getElementById("timer").textContent = 60;
+  document.getElementById("drawBox").textContent = "በመጠባበቅ ላይ...";
+  document.getElementById("tickets").innerHTML = "";
+  document.getElementById("selectedCount").textContent = "Selected: 0/10";
 
-    let saveBtn = document.querySelector('button[onclick="saveTicket()"]');
-    if(saveBtn) saveBtn.disabled = true;
+  document.querySelectorAll("#numbers button").forEach(b=>{
+    b.disabled = false;
+    b.classList.remove("selected","matched");
+  });
 
-    while(drawNumbers.length < 20){
-      let n = Math.floor(Math.random()*80)+1;
-      if(!drawNumbers.includes(n)) drawNumbers.push(n);
+  let saveBtn = document.querySelector('button[onclick="saveTicket()"]');
+  if(saveBtn) saveBtn.disabled = false;
+
+  countdown = setInterval(function(){
+    timeLeft--;
+    document.getElementById("timer").textContent = timeLeft;
+
+    if(timeLeft <= 0){
+      clearInterval(countdown);
+
+      document.querySelectorAll("#numbers button").forEach(b=>{
+        b.disabled = true;
+      });
+
+      if(saveBtn) saveBtn.disabled = true;
+
+      while(drawNumbers.length < 20){
+        let n = Math.floor(Math.random()*80)+1;
+        if(!drawNumbers.includes(n)) drawNumbers.push(n);
+      }
+
+      showNextNumber();
     }
-
-    showNextNumber();
-  }
-},1000);
+  },1000);
+}
 
 function showNextNumber(){
   if(drawIndex < 20){
-    document.getElementById("drawBox").textContent +=
-      (drawIndex === 0 ? "" : " • ") + drawNumbers[drawIndex];
+    let n = drawNumbers[drawIndex];
+    let span = document.createElement("span");
+    span.textContent = n;
+    span.style.margin = "5px";
+    span.style.display = "inline-block";
+    span.style.padding = "5px 10px";
+    span.style.borderRadius = "8px";
+
+    let matched = myTickets.some(ticket => ticket.includes(n));
+
+    if(matched){
+      span.style.background = "#f5c542";
+      span.style.color = "black";
+
+      document.querySelectorAll("#numbers button").forEach(b=>{
+        if(Number(b.textContent) === n){
+          b.classList.add("matched");
+        }
+      });
+    }
+
+    if(drawIndex > 0){
+      document.getElementById("drawBox").append(" • ");
+    }
+
+    document.getElementById("drawBox").appendChild(span);
 
     drawIndex++;
     setTimeout(showNextNumber,1000);
+  }else{
+    setTimeout(startRound,20000);
   }
 }
+
+startRound();
 </script>
 </body>
 </html>
