@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,86 +8,158 @@
 <style>
 body{background:#10131d;color:white;font-family:Arial;text-align:center;padding:15px}
 h1{color:#f5c542}
-#numbers{display:grid;grid-template-columns:repeat(8,1fr);gap:7px;max-width:500px;margin:20px auto}
-button{padding:12px 3px;border:0;border-radius:8px;background:#30384b;color:white;font-weight:bold}
-button.selected{background:#e6ad24;color:#111}
-.draw{background:#16a36a;padding:14px 25px;margin:15px;font-size:17px}
-#result{margin:20px;color:#f5c542;font-size:18px}
+button{padding:12px;border:0;border-radius:8px;background:#30384b;color:white;font-weight:bold}
 </style>
 </head>
 <body>
 <h1>FUADX KENO</h1>
-<p>Choose up to 10 numbers (1–80)</p>
+<p>Welcome to FUADX KENO</p>
+
+<div>
+  <h2>Player Registration</h2>
+  <input id="playerName" type="text" placeholder="Enter your name">
+  <button onclick="joinGame()">Join Game</button>
+  <p id="message"></p>
+  <h3>Players</h3>
+  <div id="players"></div>
+
+<h2>Choose Your Numbers</h2>
+<p>Select 1 to 10 numbers</p>
 <div id="numbers"></div>
-<button class="draw" onclick="draw()">DRAW 20 NUMBERS</button>
-<div id="result">Your game starts here!</div>
+<p id="selectedCount">Selected: 0/10</p>
+<button onclick="saveTicket()">Save Ticket</button>
+<h3>My Tickets</h3>
+<div id="tickets"></div>
+
+<style>
+#numbers{
+display:grid;
+grid-template-columns:repeat(8,1fr);
+gap:7px;
+max-width:500px;
+margin:20px auto;
+}
+#numbers button.selected{
+background:#f5c542;
+color:black;
+}
+</style>
+
 <script>
-let chosen=[];
-let box=document.getElementById("numbers");
-for(let i=1;i<=80;i++){
-let b=document.createElement("button");
-b.textContent=i;
-b.onclick=()=>{
-if(chosen.includes(i)){
-chosen=chosen.filter(n=>n!==i);
-b.classList.remove("selected");
-}else if(chosen.length<10){
-chosen.push(i);
-b.classList.add("selected");
+let selectedNumbers = [];
+let myTickets = [];
+
+const numberBox = document.getElementById("numbers");
+
+for(let n=1;n<=80;n++){
+  let b=document.createElement("button");
+  b.textContent=n;
+  b.onclick=function(){
+    if(selectedNumbers.includes(n)){
+      selectedNumbers=selectedNumbers.filter(x=>x!==n);
+      b.classList.remove("selected");
+    }else if(selectedNumbers.length<10){
+      selectedNumbers.push(n);
+      b.classList.add("selected");
+    }
+    document.getElementById("selectedCount").textContent=
+      "Selected: "+selectedNumbers.length+"/10";
+  };
+  numberBox.appendChild(b);
 }
-};
-box.appendChild(b);
-}
-function draw(){
-if(chosen.length===0){alert("Choose at least one number!");return;}
-let pool=Array.from({length:80},(_,i)=>i+1);
-pool.sort(()=>Math.random()-0.5);
-let result=pool.slice(0,20);
-let matches=chosen.filter(n=>result.includes(n));
-document.getElementById("result").innerHTML=
-"Drawn numbers: "+result.sort((a,b)=>a-b).join(", ")+"<br><br>Matches: "+matches.length+"<br>Matched: "+(matches.join(", ")||"None");
+
+function saveTicket(){
+  if(selectedNumbers.length<1){
+    alert("Select at least one number");
+    return;
+  }
+  myTickets.push([...selectedNumbers]);
+  document.getElementById("tickets").innerHTML=
+    myTickets.map((t,i)=>"Ticket "+(i+1)+": "+t.join(", ")).join("<br>");
+  selectedNumbers=[];
+  document.querySelectorAll("#numbers button").forEach(b=>
+    b.classList.remove("selected")
+  );
+  document.getElementById("selectedCount").textContent="Selected: 0/10";
 }
 </script>
+</div>
+
+<script>
+let playerList = [];
+
+function joinGame(){
+  let name = document.getElementById("playerName").value.trim();
+
+  if(name === ""){
+    document.getElementById("message").innerText = "Enter your name";
+    return;
+  }
+
+  if(playerList.length >= 10){
+    document.getElementById("message").innerText = "Game is full";
+    return;
+  }
+
+  if(playerList.includes(name)){
+    document.getElementById("message").innerText = "Name already exists";
+    return;
+  }
+
+  window.currentPlayer = name;
+playerList.push(name);
+  document.getElementById("players").innerHTML =
+    playerList.map((p,i) => (i+1)+". "+p).join("<br>");
+
+  document.getElementById("playerName").value = "";
+  document.getElementById("message").innerText = "Welcome "+name;
+}
+</script>
+
+<h2>Round Timer</h2>
+<h1 id="timer">60</h1>
+<h2>Drawn Numbers</h2>
+<div id="drawBox" style="background:#30384b;padding:20px;border-radius:12px;min-height:50px;font-size:24px;color:#f5c542">
+Waiting...
+</div>
+
 <script>
 let timeLeft = 60;
-const timer = setInterval(function() {
+let drawNumbers = [];
+let drawIndex = 0;
+
+let countdown = setInterval(function(){
   timeLeft--;
-  document.getElementById("timer").innerText = timeLeft;
-  if (timeLeft <= 0) {
-    clearInterval(timer);
-    startDraw();
+  document.getElementById("timer").textContent = timeLeft;
+
+  if(timeLeft <= 0){
+    clearInterval(countdown);
+
+    document.querySelectorAll("#numbers button").forEach(b=>{
+      b.disabled = true;
+    });
+
+    let saveBtn = document.querySelector('button[onclick="saveTicket()"]');
+    if(saveBtn) saveBtn.disabled = true;
+
+    while(drawNumbers.length < 20){
+      let n = Math.floor(Math.random()*80)+1;
+      if(!drawNumbers.includes(n)) drawNumbers.push(n);
+    }
+
+    showNextNumber();
   }
-}, 1000);
-let drawn = [];
-let index = 0;
+},1000);
 
-function startDraw() {
-  drawn = [];
-  index = 0;
+function showNextNumber(){
+  if(drawIndex < 20){
+    document.getElementById("drawBox").textContent +=
+      (drawIndex === 0 ? "" : " • ") + drawNumbers[drawIndex];
 
-  while (drawn.length < 20) {
-    let n = Math.floor(Math.random() * 80) + 1;
-    if (!drawn.includes(n)) drawn.push(n);
+    drawIndex++;
+    setTimeout(showNextNumber,1000);
   }
-
-  showNext();
 }
-
-function showNext() {
-  if (index < 20) {
-    document.getElementById("result").innerHTML +=
-      drawn[index] + "<br>";
-    index++;
-    setTimeout(showNext, 1000);
-  }
-}function startDraw() {
-  let drawn = [];
-  while (drawn.length < 20) {
-    let n = Math.floor(Math.random() * 80) + 1;
-    if (!drawn.includes(n)) drawn.push(n);
-  }
-
-  document.getElementById("result").innerHTML =
-    "Drawn numbers: " + drawn.join(", ");
-}</script><div id="timer">60</div><div id="result"></div></body>
-</html> 
+</script>
+</body>
+</html>
