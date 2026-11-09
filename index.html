@@ -79,5 +79,14 @@ function showNext() {
     index++;
     setTimeout(showNext, 1000);
   }
+}function startDraw() {
+  let drawn = [];
+  while (drawn.length < 20) {
+    let n = Math.floor(Math.random() * 80) + 1;
+    if (!drawn.includes(n)) drawn.push(n);
+  }
+
+  document.getElementById("result").innerHTML =
+    "Drawn numbers: " + drawn.join(", ");
 }</script><div id="timer">60</div><div id="result"></div></body>
 </html> 
