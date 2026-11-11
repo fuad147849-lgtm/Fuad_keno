@@ -1,216 +1,57 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FUADX KENO</title>
-<style>
-body{background:#10131d;color:white;font-family:Arial;text-align:center;padding:15px}
-h1{color:#f5c542}
-button{padding:12px;border:0;border-radius:8px;background:#30384b;color:white;font-weight:bold}
-</style>
-</head>
-<body>
-<h1>FUADX KENO</h1>
-<p>Welcome to FUADX KENO</p>
+import { DurableObject } from "cloudflare:workers";
 
-<div>
-  <h2>Player Registration</h2>
-  <input id="playerName" type="text" placeholder="Enter your name">
-  <button onclick="joinGame()">Join Game</button>
-  <p id="message"></p>
-  <h3>Players</h3>
-  <div id="players"></div>
-
-<h2>Choose Your Numbers</h2>
-<p>Select 1 to 10 numbers</p>
-<h2>የዙር ቆጣሪ</h2>
-<h1 id="timer">60</h1>
-
-<h2>የተሳሉ ቁጥሮች (Drawn Numbers)</h2>
-<div id="drawBox" style="background:#30384b;padding:20px;border-radius:12px;min-height:50px;font-size:24px;color:#f5c542">
-በመጠባበቅ ላይ...
-</div><div id="numbers"></div>
-<p id="selectedCount">Selected: 0/10</p>
-<button onclick="saveTicket()">Save Ticket</button>
-<h3>My Tickets</h3>
-<div id="tickets"></div>
-
-<style>
-#numbers{
-display:grid;
-grid-template-columns:repeat(8,1fr);
-gap:7px;
-max-width:500px;
-margin:20px auto;
-}
-#numbers button.selected{
-background:#f5c542;
-color:black;
-}
-</style>
-
-<script>
-let selectedNumbers = [];
-let myTickets = [];
-
-const numberBox = document.getElementById("numbers");
-
-for(let n=1;n<=80;n++){
-  let b=document.createElement("button");
-  b.textContent=n;
-  b.onclick=function(){
-    if(selectedNumbers.includes(n)){
-      selectedNumbers=selectedNumbers.filter(x=>x!==n);
-      b.classList.remove("selected");
-    }else if(selectedNumbers.length<10){
-      selectedNumbers.push(n);
-      b.classList.add("selected");
-    }
-    document.getElementById("selectedCount").textContent=
-      "Selected: "+selectedNumbers.length+"/10";
-  };
-  numberBox.appendChild(b);
-}
-
-function saveTicket(){
-  if(selectedNumbers.length<1){
-    alert("Select at least one number");
-    return;
-  }
-  myTickets.push([...selectedNumbers]);
-  document.getElementById("tickets").innerHTML=
-    myTickets.map((t,i)=>"Ticket "+(i+1)+": "+t.join(", ")).join("<br>");
-  selectedNumbers=[];
-  document.querySelectorAll("#numbers button").forEach(b=>
-    b.classList.remove("selected")
-  );
-  document.getElementById("selectedCount").textContent="Selected: 0/10";
-}
-</script>
-</div>
-
-<script>
-let playerList = [];
-
-function joinGame(){
-  let name = document.getElementById("playerName").value.trim();
-
-  if(name === ""){
-    document.getElementById("message").innerText = "Enter your name";
-    return;
+export class MyDurableObject extends DurableObject {
+  constructor(ctx, env) {
+    super(ctx, env);
   }
 
-  if(playerList.length >= 10){
-    document.getElementById("message").innerText = "Game is full";
-    return;
-  }
+  async fetch(request) {
+    const url = new URL(request.url);
 
-  if(playerList.includes(name)){
-    document.getElementById("message").innerText = "Name already exists";
-    return;
-  }
+    if (url.pathname === "/state") {
+      this.ctx.storage.sql.exec(`
+        CREATE TABLE IF NOT EXISTS game_state (
+          id TEXT PRIMARY KEY,
+          value TEXT NOT NULL
+        )
+      `);
 
-  window.currentPlayer = name;
-playerList.push(name);
-  document.getElementById("players").innerHTML =
-    playerList.map((p,i) => (i+1)+". "+p).join("<br>");
+      let row = this.ctx.storage.sql
+        .exec("SELECT value FROM game_state WHERE id = ?", "main")
+        .one();
 
-  document.getElementById("playerName").value = "";
-  document.getElementById("message").innerText = "Welcome "+name;
-}
-</script>
+      let state;
 
-<script>
-let timeLeft = 60;
-let drawNumbers = [];
-let drawIndex = 0;
-let countdown;
+      if (row) {
+        state = JSON.parse(row.value);
+      } else {
+        state = {
+          round: 1,
+          status: "waiting",
+          players: {},
+          tickets: {},
+          drawnNumbers: []
+        };
 
-function startRound(){
-  clearInterval(countdown);
-
-  timeLeft = 60;
-  drawNumbers = [];
-  drawIndex = 0;
-  selectedNumbers = [];
-  myTickets = [];
-
-  document.getElementById("timer").textContent = 60;
-  document.getElementById("drawBox").textContent = "በመጠባበቅ ላይ...";
-  document.getElementById("tickets").innerHTML = "";
-  document.getElementById("selectedCount").textContent = "Selected: 0/10";
-
-  document.querySelectorAll("#numbers button").forEach(b=>{
-    b.disabled = false;
-    b.classList.remove("selected","matched");
-  });
-
-  let saveBtn = document.querySelector('button[onclick="saveTicket()"]');
-  if(saveBtn) saveBtn.disabled = false;
-
-  countdown = setInterval(function(){
-    timeLeft--;
-    document.getElementById("timer").textContent = timeLeft;
-
-    if(timeLeft <= 0){
-      clearInterval(countdown);
-
-      document.querySelectorAll("#numbers button").forEach(b=>{
-        b.disabled = true;
-      });
-
-      if(saveBtn) saveBtn.disabled = true;
-
-      while(drawNumbers.length < 20){
-        let n = Math.floor(Math.random()*80)+1;
-        if(!drawNumbers.includes(n)) drawNumbers.push(n);
+        this.ctx.storage.sql.exec(
+          "INSERT INTO game_state (id, value) VALUES (?, ?)",
+          "main",
+          JSON.stringify(state)
+        );
       }
 
-      showNextNumber();
-    }
-  },1000);
-}
-
-function showNextNumber(){
-  if(drawIndex < 20){
-    let n = drawNumbers[drawIndex];
-    let span = document.createElement("span");
-    span.textContent = n;
-    span.style.margin = "5px";
-    span.style.display = "inline-block";
-    span.style.padding = "5px 10px";
-    span.style.borderRadius = "8px";
-
-    let matched = myTickets.some(ticket => ticket.includes(n));
-
-    if(matched){
-      span.style.background = "#f5c542";
-      span.style.color = "black";
-
-      document.querySelectorAll("#numbers button").forEach(b=>{
-        if(Number(b.textContent) === n){
-          b.classList.add("matched");
-        }
-      });
+      return Response.json(state);
     }
 
-    if(drawIndex > 0){
-      document.getElementById("drawBox").append(" • ");
-    }
-
-    document.getElementById("drawBox").appendChild(span);
-
-    drawIndex++;
-    setTimeout(showNextNumber,1000);
-  }else{
-    setTimeout(startRound,20000);
+    return new Response("FUADX KENO SERVER READY");
   }
 }
 
-  // Firebase connection will be added here
-startRound();
-</script>
-</body>
-</html>
+export default {
+  async fetch(request, env) {
+    const id = env.MY_DURABLE_OBJECT.idFromName("fuadx-keno-game");
+    const stub = env.MY_DURABLE_OBJECT.get(id);
+    return stub.fetch(request);
+  }
+};
