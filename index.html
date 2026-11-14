@@ -250,12 +250,12 @@ async function buyTicket() {
 
     selected = [];
     await refreshGame();
-    alert("ቲኬትህ ተገዝቷል።");
+
   } catch (error) {
     alert(error.message);
   }
 }
-
+  
 async function requestCoins() {
   if (!playerId) {
     alert("መጀመሪያ ጨዋታውን ተቀላቀል።");
