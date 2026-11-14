@@ -276,7 +276,7 @@ function showDrawn() {
   const myNumbers = new Set(
     tickets
       .filter(t => t.playerId === playerId)
-      .flatMap(t => t.numbers)
+      .flatMap(t => t.numbers.map(Number))
   );
 
   drawn.forEach(n => {
@@ -284,7 +284,7 @@ function showDrawn() {
     b.textContent = n;
     b.className = "num";
 
-    if (myNumbers.has(n)) {
+    if (myNumbers.has(Number(n))) {
       b.classList.add("hit");
     }
 
