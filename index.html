@@ -286,23 +286,44 @@ function showTickets() {
 
   tickets.forEach(t => {
     const div = document.createElement("div");
-    div.style.padding = "8px";
-    div.style.margin = "6px 0";
-    div.style.background = "#202633";
-    div.style.borderRadius = "8px";
+    div.className = "ticket";
+
+    const name = document.createElement("div");
+    name.textContent = "ተጫዋች: " + t.name;
+    name.style.fontWeight = "bold";
+    div.appendChild(name);
+
+    const numbersBox = document.createElement("div");
+    numbersBox.className = "ticketnums";
 
     const hitNumbers = t.numbers.filter(n => drawn.includes(n));
 
-    div.textContent =
-      t.name + " | " +
-      t.numbers.join(", ") +
-      " | የተመሳሰሉ: " + hitNumbers.length +
+    t.numbers.forEach(n => {
+      const number = document.createElement("span");
+      number.className = "ticketnum";
+
+      if (drawn.includes(n)) {
+        number.classList.add("hit");
+      }
+
+      number.textContent = n;
+      numbersBox.appendChild(number);
+    });
+
+    div.appendChild(numbersBox);
+
+    const result = document.createElement("div");
+    result.className = "small";
+    result.style.marginTop = "6px";
+    result.textContent =
+      "የተመሳሰሉ: " + hitNumbers.length +
       " | ሽልማት: " + (t.reward || 0) + " COIN";
 
+    div.appendChild(result);
     $("tickets").appendChild(div);
   });
 }
-
+  
 async function refreshGame() {
   try {
     const result = await api("/state");
