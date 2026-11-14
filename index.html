@@ -273,14 +273,25 @@ async function requestCoins() {
 function showDrawn() {
   $("drawn").innerHTML = "";
 
+  const myNumbers = new Set(
+    tickets
+      .filter(t => t.playerId === playerId)
+      .flatMap(t => t.numbers)
+  );
+
   drawn.forEach(n => {
     const b = document.createElement("span");
     b.textContent = n;
     b.className = "num";
+
+    if (myNumbers.has(n)) {
+      b.classList.add("hit");
+    }
+
     $("drawn").appendChild(b);
   });
 }
-
+  
 function showTickets() {
   $("tickets").innerHTML = "";
 
