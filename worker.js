@@ -245,6 +245,11 @@ export class MyDurableObject extends DurableObject {
       }
 
       player.coins += amount;
+      player.coinNotice = {
+  id: crypto.randomUUID(),
+  amount,
+  createdAt: Date.now()
+};
       coinRequest.status = "approved";
       coinRequest.amount = amount;
       coinRequest.approvedAt = Date.now();
