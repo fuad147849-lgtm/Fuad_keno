@@ -103,47 +103,58 @@ button:disabled{opacity:.45}
 </div>
 
 <script>
-const rewards = {
-  3:{3:120,2:60,1:2},
-  4:{4:240,3:60,2:30,1:2},
-  5:{5:300,4:120,3:60,2:20,1:0},
-  6:{6:600,5:400,4:200,3:100,2:0,1:0},
-  7:{7:900,6:500,5:200,4:60,3:2,2:0,1:0},
-  8:{8:1200,7:900,6:600,5:300,4:60,3:2,2:0,1:0},
-  9:{9:1500,8:1000,7:600,6:300,5:100,4:2,3:0,2:0,1:0},
-  10:{10:2000,9:1500,8:1000,7:700,6:400,5:100,4:2,3:0,2:0,1:0}
-};
 
-let coins = Number(localStorage.getItem("fuadxCoins") || 100);
+const API = "https://fuadx-keno-multiplayer.fuad147849.workers.dev";
+
+let playerId = localStorage.getItem("fuadxPlayerId") || "";
+let coins = 100;
 let selected = [];
 let tickets = [];
 let drawn = [];
-let seconds = 0;
+let players = {};
 let phase = "idle";
+let seconds = 0;
 let timerInterval = null;
-let drawInterval = null;
+let drawRequested = false;
 
 const $ = id => document.getElementById(id);
 
-function showCoins(){
-  $("coins").textContent = coins;
-  localStorage.setItem("fuadxCoins", String(coins));
+async function api(path, data) {
+  const response = await fetch(API + path, {
+    method: data ? "POST" : "GET",
+    headers: data ? {"Content-Type":"application/json"} : {},
+    body: data ? JSON.stringify(data) : undefined
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.error || "Server error");
+  }
+
+  return result;
 }
 
-function makeGrid(){
+function showCoins() {
+  $("coins").textContent = coins;
+}
+
+function makeGrid() {
   $("numbers").innerHTML = "";
-  for(let n=1;n<=80;n++){
+
+  for (let n = 1; n <= 80; n++) {
     const b = document.createElement("button");
     b.className = "num";
     b.textContent = n;
     b.onclick = () => selectNumber(n);
     $("numbers").appendChild(b);
   }
+
   updateGrid();
 }
 
-function updateGrid(){
-  document.querySelectorAll(".num").forEach(b=>{
+function updateGrid() {
+  document.querySelectorAll(".num").forEach(b => {
     const n = Number(b.textContent);
     b.classList.toggle("selected", selected.includes(n));
     b.disabled = phase !== "select";
@@ -151,189 +162,162 @@ function updateGrid(){
 
   $("chosen").textContent = selected.length;
 
+  const price = Number($("ticketPrice").value);
+
   $("buyBtn").disabled =
     phase !== "select" ||
     selected.length < 3 ||
     selected.length > 10 ||
-    tickets.length >= 10 ||
-    coins < 2;
+    tickets.filter(t => t.playerId === playerId).length >= 10 ||
+    coins < price;
 }
 
-function selectNumber(n){
-  if(phase !== "select") return;
+function selectNumber(n) {
+  if (phase !== "select") return;
 
-  if(selected.includes(n)){
-    selected = selected.filter(x=>x !== n);
-  }else{
-    if(selected.length >= 10){
+  if (selected.includes(n)) {
+    selected = selected.filter(x => x !== n);
+  } else {
+    if (selected.length >= 10) {
       $("status").textContent = "ከ10 በላይ ቁጥር መምረጥ አይቻልም።";
       return;
     }
+
     selected.push(n);
   }
 
   updateGrid();
 }
 
-function clearSelection(){
-  if(phase !== "select") return;
+function clearSelection() {
+  if (phase !== "select") return;
   selected = [];
   updateGrid();
 }
 
-function buyTicket(){
-  if(phase !== "select") return;
-  if(selected.length < 3 || selected.length > 10) return;
-  if(coins < 2) return;
-  if(tickets.length >= 10) return;
+async function joinGame() {
+  try {
+    const state = await api("/state");
+    const game = state.game;
 
-  const name = $("player").value.trim() || "ተጫዋች";
+    if (playerId && game.players[playerId]) {
+      return;
+    }
 
-  const price = Number($("ticketPrice").value);
+    const name = $("player").value.trim();
 
-if (coins < price) {
-  alert("በቂ COIN የለህም");
-  return;
-}
+    if (!name) {
+      $("status").textContent = "እባክዎ የተጫዋች ስም ያስገቡ።";
+      return;
+    }
 
-coins -= price;
-showCoins();
+    const result = await api("/join", {name});
 
-  tickets.push({
-    name:name,
-    numbers:[...selected],
-    reward:0,
-    matches:0,
-    paid:false
-  });
+    playerId = result.player.id;
+    localStorage.setItem("fuadxPlayerId", playerId);
 
-  selected = [];
-  updateGrid();
-  showTickets();
+    await refreshGame();
 
-  $("status").textContent = "ቲኬት ተገዝቷል።";
-}
-
-function startGame(){
-  clearInterval(timerInterval);
-  clearInterval(drawInterval);
-
-  if(phase === "select" || phase === "draw"){
-    $("status").textContent = "ጨዋታው እየተካሄደ ነው።";
-    return;
+  } catch (error) {
+    $("status").textContent = "Server ማገናኘት አልተቻለም። " + error.message;
   }
+}
 
-  selected = [];
-  tickets = [];
-  drawn = [];
-  seconds = 60;
-  phase = "select";
-
-  $("drawn").innerHTML = "";
-  $("timer").textContent = seconds;
-  $("status").textContent = "ቁጥሮችዎን ይምረጡ። 60 ሰከንድ አለዎት።";
-  $("startBtn").textContent = "ጨዋታው ተጀምሯል";
-  $("startBtn").disabled = true;
-
-  showTickets();
-  updateGrid();
-
-  timerInterval = setInterval(()=>{
-    seconds--;
-    $("timer").textContent = seconds;
-
-    if(seconds <= 0){
-      clearInterval(timerInterval);
-      beginDraw();
+async function startGame() {
+  try {
+    if (!playerId) {
+      await joinGame();
+      if (!playerId) return;
     }
-  },1000);
+
+    await api("/start", {});
+    selected = [];
+    drawRequested = false;
+
+    await refreshGame();
+
+  } catch (error) {
+    $("status").textContent = error.message;
+    await refreshGame();
+  }
 }
 
-function beginDraw(){
-  phase = "draw";
-  seconds = 20;
-  $("timer").textContent = seconds;
-  $("status").textContent = "የእጣ ቁጥሮች እየወጡ ነው።";
-  updateGrid();
-
-  drawInterval = setInterval(()=>{
-    let n;
-    do{
-      n = Math.floor(Math.random()*80)+1;
-    }while(drawn.includes(n));
-
-    drawn.push(n);
-    seconds = 20 - drawn.length;
-    $("timer").textContent = seconds;
-
-    showDrawn();
-    showTickets();
-
-    if(drawn.length >= 20){
-      clearInterval(drawInterval);
-      finishRound();
+async function buyTicket() {
+  try {
+    if (!playerId) {
+      $("status").textContent = "መጀመሪያ ይግቡ።";
+      return;
     }
-  },1000);
+
+    const price = Number($("ticketPrice").value);
+
+    if (selected.length < 3 || selected.length > 10) return;
+
+    await api("/ticket", {
+      playerId,
+      numbers: [...selected],
+      price
+    });
+
+    selected = [];
+    $("status").textContent = "ቲኬት ተገዝቷል።";
+
+    await refreshGame();
+
+  } catch (error) {
+    $("status").textContent = error.message;
+  }
 }
 
-function isHit(number){
-  return tickets.some(ticket=>ticket.numbers.includes(number));
-}
-
-function showDrawn(){
+function showDrawn() {
   $("drawn").innerHTML = "";
 
-  drawn.forEach(n=>{
+  drawn.forEach(n => {
     const b = document.createElement("div");
-    b.className = "draw" + (isHit(n) ? " hit" : "");
+    b.className = "draw" +
+      (tickets.some(t => t.numbers.includes(n)) ? " hit" : "");
     b.textContent = n;
     $("drawn").appendChild(b);
   });
 }
 
-function showTickets(){
+function showTickets() {
   const area = $("tickets");
 
-  if(tickets.length === 0){
+  if (!tickets.length) {
     area.innerHTML = '<p class="small">ገና ቲኬት አልተገዛም።</p>';
     return;
   }
 
   area.innerHTML = "";
 
-  tickets.forEach((ticket,index)=>{
+  tickets.forEach((ticket, index) => {
     const box = document.createElement("div");
     box.className = "ticket";
 
     const title = document.createElement("b");
-    title.textContent = (index+1) + ". " + ticket.name;
+    title.textContent = (index + 1) + ". " + ticket.name;
     box.appendChild(title);
 
     const nums = document.createElement("div");
     nums.className = "ticketnums";
 
-    ticket.numbers.forEach(n=>{
+    ticket.numbers.forEach(n => {
       const item = document.createElement("span");
-      item.className = "ticketnum" + (drawn.includes(n) ? " hit" : "");
+      item.className = "ticketnum" +
+        (drawn.includes(n) ? " hit" : "");
       item.textContent = n;
       nums.appendChild(item);
     });
 
     box.appendChild(nums);
 
-    if(phase === "finished"){
+    if (phase === "finished") {
       const result = document.createElement("p");
       result.className = "result";
       result.textContent =
         "የተገጣጠሙ: " + ticket.matches +
         " | ሽልማት: " + ticket.reward + " COIN";
-      box.appendChild(result);
-    }else if(drawn.length > 0){
-      const result = document.createElement("p");
-      result.className = "small";
-      result.textContent =
-        "የተገጣጠሙ: " +
-        ticket.numbers.filter(n=>drawn.includes(n)).length;
       box.appendChild(result);
     }
 
@@ -341,46 +325,89 @@ function showTickets(){
   });
 }
 
-function finishRound(){
-  phase = "finished";
-  let totalReward = 0;
+async function refreshGame() {
+  try {
+    const result = await api("/state");
+    const game = result.game;
 
-  tickets.forEach(ticket=>{
-    ticket.matches = ticket.numbers.filter(n=>drawn.includes(n)).length;
+    players = game.players || {};
+    tickets = Object.values(game.tickets || {});
+    drawn = game.drawnNumbers || [];
+    phase = game.status;
 
-    const table = rewards[ticket.numbers.length] || {};
-    ticket.reward = table[ticket.matches] || 0;
-    totalReward += ticket.reward;
-    ticket.paid = true;
-  });
+    if (playerId && players[playerId]) {
+      coins = players[playerId].coins;
+      $("player").value = players[playerId].name;
+    } else if (playerId) {
+      playerId = "";
+      localStorage.removeItem("fuadxPlayerId");
+    }
 
-  coins += totalReward;
-  showCoins();
-  showDrawn();
-  showTickets();
+    showCoins();
+    showDrawn();
+    showTickets();
 
-  $("timer").textContent = "0";
-  $("status").textContent =
-    "ጨዋታው ተጠናቋል። ጠቅላላ ሽልማት: " +
-    totalReward + " COIN";
+    if (phase === "select") {
+      seconds = Math.max(
+        0,
+        Math.ceil((game.selectionEndsAt - Date.now()) / 1000)
+      );
 
-  $("startBtn").disabled = false;
-  $("startBtn").textContent = "አዲስ ጨዋታ ጀምር";
+      $("timer").textContent = seconds;
+      $("status").textContent =
+        "ቁጥሮችዎን ይምረጡ። ተጫዋቾች: " +
+        Object.keys(players).length;
 
-  updateGrid();
+      $("startBtn").textContent = "ጨዋታው ተጀምሯል";
+      $("startBtn").disabled = true;
 
-  setTimeout(() => {
-    startGame();
-  }, 5000);
+      if (seconds <= 0 && !drawRequested) {
+        drawRequested = true;
+        try {
+          await api("/draw", {});
+          await refreshGame();
+        } catch (error) {
+          await refreshGame();
+        }
+      }
+
+    } else if (phase === "draw") {
+      $("status").textContent = "የእጣ ቁጥሮች እየወጡ ነው።";
+      $("startBtn").disabled = true;
+
+    } else if (phase === "finished") {
+      $("timer").textContent = "0";
+      $("status").textContent = "ጨዋታው ተጠናቋል።";
+      $("startBtn").disabled = false;
+      $("startBtn").textContent = "አዲስ ጨዋታ ጀምር";
+
+    } else {
+      $("timer").textContent = "--";
+      $("status").textContent =
+        "ጨዋታ ለመጀመር ይጫኑ። ተጫዋቾች: " +
+        Object.keys(players).length;
+
+      $("startBtn").disabled = false;
+      $("startBtn").textContent = "ጨዋታ አስጀምር";
+    }
+
+    updateGrid();
+
+  } catch (error) {
+    $("status").textContent = "Server ግንኙነት ተቋርጧል።";
+  }
 }
 
-showCoins();
+$("ticketPrice").addEventListener("change", updateGrid);
+
 makeGrid();
-showTickets();
-window.addEventListener("load", () => {
-  makeGrid();
-  startGame();
-});
+showCoins();
+
+joinGame().then(() => refreshGame());
+
+setInterval(refreshGame, 1500);
+    
+  const rewards = {
 </script>
 
 </body>
