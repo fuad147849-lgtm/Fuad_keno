@@ -138,15 +138,15 @@ export class MyDurableObject extends DurableObject {
       if (!PRICES.includes(price)) {
         return reply({ error: "Invalid ticket price" }, 400);
       }
-
+ 
       if (!Array.isArray(numbers) ||
-          numbers.length < 3 ||
-          numbers.length > 10 ||
-          new Set(numbers).size !== numbers.length ||
-          numbers.some(n => !Number.isInteger(n) || n < 1 || n > 80)) {
-        return reply({ error: "Choose 3 to 10 different numbers from 1 to 80" }, 400);
-      }
-
+    numbers.length < 1 ||
+    numbers.length > 10 ||
+    new Set(numbers).size !== numbers.length ||
+    numbers.some(n => !Number.isInteger(n) || n < 1 || n > 80)) {
+  return reply({ error: "Choose 1 to 10 different numbers from 1 to 80" }, 400);
+}
+      
       const playerTickets = game.tickets.filter(
         t => t.playerId === playerId
       );
