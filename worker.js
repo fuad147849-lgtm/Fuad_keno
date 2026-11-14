@@ -3,6 +3,8 @@ import { DurableObject } from "cloudflare:workers";
 const PRICES = [2, 4, 8, 10, 20];
 
 const REWARDS = {
+  1: {1:4},
+  2: {2:10, 1:2},
   3: {3:120, 2:60, 1:2},
   4: {4:240, 3:60, 2:30, 1:2},
   5: {5:300, 4:120, 3:60, 2:20, 1:0},
