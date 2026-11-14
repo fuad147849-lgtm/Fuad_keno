@@ -311,6 +311,15 @@ async function refreshGame() {
     tickets = Array.isArray(game.tickets) ? game.tickets : [];
     drawn = game.drawnNumbers || [];
     players = game.players || {};
+   const notice = players[playerId]?.coinNotice;
+
+if (notice) {
+  const noticeKey = "fuadxSeenCoinNotice_" + playerId;
+  if (localStorage.getItem(noticeKey) !== notice.id) {
+    localStorage.setItem(noticeKey, notice.id);
+    alert(notice.amount + " COIN ተጨምሮልሃል።");
+  }
+}
     phase = game.status;
 
     if (playerId && players[playerId]) {
