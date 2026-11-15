@@ -1,7 +1,7 @@
 
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-"name": "fuadx-keno-multiplayer",
+  "name": "fuadx-keno-multiplayer",
   "main": "worker.js",
   "compatibility_date": "2026-11-11",
   "durable_objects": {
@@ -17,20 +17,20 @@
       "tag": "v1",
       "new_sqlite_classes": ["MyDurableObject"]
     }
-  ]
-}
-,
-"observability": {
-  "enabled": true,
-  "head_sampling_rate": 1,
-  "logs": {
+  ],
+  "observability": {
     "enabled": true,
-    "invocation_logs": true,
-    "persist": true
-  },
-  "traces": {
-    "enabled": true,
-    "persist": true
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "persist": true
+    },
+    "traces": {
+      "enabled": true,
+      "persist": true
+    }
   }
 }
+
 // FUADX KENO Multiplayer configuration
