@@ -2,17 +2,18 @@ import { DurableObject } from "cloudflare:workers";
 
 const PRICES = [2, 4, 8, 10, 20];
 
+// ሽልማት = የቲኬት ዋጋ × ብዜት
 const REWARDS = {
-  1: {1:4},
-  2: {2:10, 1:2},
-  3: {3:120, 2:60, 1:2},
-  4: {4:240, 3:60, 2:30, 1:2},
-  5: {5:300, 4:120, 3:60, 2:20, 1:0},
-  6: {6:600, 5:400, 4:200, 3:100, 2:0, 1:0},
-  7: {7:900, 6:500, 5:200, 4:60, 3:2, 2:0, 1:0},
-  8: {8:1200, 7:900, 6:600, 5:300, 4:60, 3:2, 2:0, 1:0},
-  9: {9:1500, 8:1000, 7:600, 6:300, 5:100, 4:2, 3:0, 2:0, 1:0},
-  10:{10:2000, 9:1500, 8:1000, 7:700, 6:400, 5:100, 4:2, 3:0, 2:0, 1:0}
+  1: {1:3},
+  2: {2:7},
+  3: {2:2, 3:20},
+  4: {2:1, 3:5, 4:30},
+  5: {3:2, 4:10, 5:40},
+  6: {3:1, 4:5, 5:15, 6:45},
+  7: {4:1, 5:4, 6:15, 7:50},
+  8: {4:2, 5:5, 6:20, 7:30, 8:55},
+  9: {5:3, 6:10, 7:35, 8:45, 9:65},
+  10: {5:2, 6:7, 7:40, 8:60, 9:80, 10:100}
 };
 
 function initialGame() {
@@ -64,8 +65,10 @@ export class MyDurableObject extends DurableObject {
 
     const game = await this.getGame();
 
-    if (method === "GET" &&
-        (url.pathname === "/" || url.pathname === "/state")) {
+    if (
+      method === "GET" &&
+      (url.pathname === "/" || url.pathname === "/state")
+    ) {
       return reply({ success: true, game });
     }
 
@@ -73,6 +76,7 @@ export class MyDurableObject extends DurableObject {
       return reply({ success: true, status: "online" });
     }
 
+    // ተጫዋች መቀላቀል
     if (method === "POST" && url.pathname === "/join") {
       const body = await request.json();
       const name = String(body.name || "").trim();
@@ -86,10 +90,11 @@ export class MyDurableObject extends DurableObject {
         game.players[playerId].name = name;
       } else {
         playerId = crypto.randomUUID();
+
         game.players[playerId] = {
           id: playerId,
           name,
-          coins: 100,
+          coins: 0,
           joinedAt: Date.now()
         };
       }
@@ -102,6 +107,7 @@ export class MyDurableObject extends DurableObject {
       });
     }
 
+    // የመጀመሪያውን ዙር Admin ያስጀምራል
     if (method === "POST" && url.pathname === "/start") {
       if (game.status === "select" || game.status === "draw") {
         return reply({ error: "Game already running" }, 409);
@@ -122,6 +128,7 @@ export class MyDurableObject extends DurableObject {
       return reply({ success: true, game });
     }
 
+    // ቲኬት መግዛት
     if (method === "POST" && url.pathname === "/ticket") {
       const body = await request.json();
       const playerId = String(body.playerId || "");
@@ -140,15 +147,19 @@ export class MyDurableObject extends DurableObject {
       if (!PRICES.includes(price)) {
         return reply({ error: "Invalid ticket price" }, 400);
       }
- 
-      if (!Array.isArray(numbers) ||
-    numbers.length < 1 ||
-    numbers.length > 10 ||
-    new Set(numbers).size !== numbers.length ||
-    numbers.some(n => !Number.isInteger(n) || n < 1 || n > 80)) {
-  return reply({ error: "Choose 1 to 10 different numbers from 1 to 80" }, 400);
-}
-      
+
+      if (
+        !Array.isArray(numbers) ||
+        numbers.length < 1 ||
+        numbers.length > 10 ||
+        new Set(numbers).size !== numbers.length ||
+        numbers.some(n => !Number.isInteger(n) || n < 1 || n > 80)
+      ) {
+        return reply({
+          error: "Choose 1 to 10 different numbers from 1 to 80"
+        }, 400);
+      }
+
       const playerTickets = game.tickets.filter(
         t => t.playerId === playerId
       );
@@ -182,6 +193,7 @@ export class MyDurableObject extends DurableObject {
       });
     }
 
+    // COIN መጠየቅ
     if (method === "POST" && url.pathname === "/coin-request") {
       const body = await request.json();
       const playerId = String(body.playerId || "");
@@ -200,7 +212,10 @@ export class MyDurableObject extends DurableObject {
       );
 
       if (pending) {
-        return reply({ success: true, message: "Request already sent" });
+        return reply({
+          success: true,
+          message: "Request already sent"
+        });
       }
 
       game.coinRequests.push({
@@ -213,9 +228,13 @@ export class MyDurableObject extends DurableObject {
 
       await this.save(game);
 
-      return reply({ success: true, message: "COIN request sent" });
+      return reply({
+        success: true,
+        message: "COIN request sent"
+      });
     }
 
+    // Admin: የCOIN ጥያቄዎች
     if (method === "GET" && url.pathname === "/admin/requests") {
       return reply({
         success: true,
@@ -223,6 +242,7 @@ export class MyDurableObject extends DurableObject {
       });
     }
 
+    // Admin: የፈለገውን COIN መስጠት
     if (method === "POST" && url.pathname === "/admin/give-coins") {
       const body = await request.json();
       const requestId = String(body.requestId || "");
@@ -248,10 +268,11 @@ export class MyDurableObject extends DurableObject {
 
       player.coins += amount;
       player.coinNotice = {
-  id: crypto.randomUUID(),
-  amount,
-  createdAt: Date.now()
-};
+        id: crypto.randomUUID(),
+        amount,
+        createdAt: Date.now()
+      };
+
       coinRequest.status = "approved";
       coinRequest.amount = amount;
       coinRequest.approvedAt = Date.now();
@@ -265,12 +286,12 @@ export class MyDurableObject extends DurableObject {
       });
     }
 
+    // Admin: ጨዋታውን ዳግም ማቆም
     if (method === "POST" && url.pathname === "/reset") {
       game.status = "waiting";
       game.tickets = [];
       game.drawnNumbers = [];
       game.selectionEndsAt = null;
-      game.round += 1;
 
       await this.save(game);
       await this.ctx.storage.deleteAlarm();
@@ -284,19 +305,24 @@ export class MyDurableObject extends DurableObject {
   async alarm() {
     const game = await this.getGame();
 
+    // የምርጫ ጊዜ ሲያበቃ ዕጣ ማውጣት ይጀምራል
     if (game.status === "select") {
       game.status = "draw";
       game.selectionEndsAt = null;
+
       await this.save(game);
       await this.ctx.storage.setAlarm(Date.now() + 1000);
       return;
     }
 
+    // 20 ቁጥሮችን አንድ በአንድ ማውጣት
     if (game.status === "draw") {
       const remaining = [];
 
       for (let n = 1; n <= 80; n++) {
-        if (!game.drawnNumbers.includes(n)) remaining.push(n);
+        if (!game.drawnNumbers.includes(n)) {
+          remaining.push(n);
+        }
       }
 
       if (remaining.length > 0) {
@@ -313,8 +339,10 @@ export class MyDurableObject extends DurableObject {
             n => game.drawnNumbers.includes(n)
           ).length;
 
-          ticket.reward =
+          const multiplier =
             REWARDS[ticket.numbers.length]?.[ticket.matches] || 0;
+
+          ticket.reward = ticket.price * multiplier;
 
           const player = game.players[ticket.playerId];
 
@@ -324,12 +352,30 @@ export class MyDurableObject extends DurableObject {
         }
 
         game.status = "finished";
+
         await this.save(game);
+
+        // ውጤቱ ለ5 ሰከንድ ከታየ በኋላ ቀጣይ ዙር
+        await this.ctx.storage.setAlarm(Date.now() + 5000);
         return;
       }
 
       await this.save(game);
       await this.ctx.storage.setAlarm(Date.now() + 1000);
+      return;
+    }
+
+    // ቀጣይ ዙር በራሱ ይጀምራል
+    if (game.status === "finished") {
+      game.round += 1;
+      game.status = "select";
+      game.tickets = [];
+      game.drawnNumbers = [];
+      game.selectionEndsAt = Date.now() + 60000;
+
+      await this.save(game);
+      await this.ctx.storage.setAlarm(game.selectionEndsAt);
+      return;
     }
   }
 }
@@ -348,6 +394,7 @@ export default {
       return new Response(null, { headers });
     }
 
+    // እነዚህ መንገዶች Admin Key ይፈልጋሉ
     const adminRoutes = [
       "/start",
       "/reset",
@@ -379,4 +426,3 @@ export default {
     return stub.fetch(request);
   }
 };
-          
