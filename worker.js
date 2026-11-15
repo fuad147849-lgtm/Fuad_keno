@@ -281,57 +281,74 @@ export class MyDurableObject extends DurableObject {
     return reply({ error: "Not found" }, 404);
   }
 
-  async alarm() {
-    const game = await this.getGame();
+  
+async alarm() {
+  const game = await this.getGame();
 
-    if (game.status === "select") {
-      game.status = "draw";
-      game.selectionEndsAt = null;
+  // ከ5 ሰከንድ በኋላ አዲስ ዙር
+  if (game.status === "finished") {
+    game.round += 1;
+    game.status = "select";
+    game.tickets = [];
+    game.drawnNumbers = [];
+    game.selectionEndsAt = Date.now() + 60000;
+
+    await this.save(game);
+    await this.ctx.storage.setAlarm(game.selectionEndsAt);
+    return;
+  }
+
+  if (game.status === "select") {
+    game.status = "draw";
+    game.selectionEndsAt = null;
+    await this.save(game);
+    await this.ctx.storage.setAlarm(Date.now() + 1000);
+    return;
+  }
+
+  if (game.status === "draw") {
+    const remaining = [];
+
+    for (let n = 1; n <= 80; n++) {
+      if (!game.drawnNumbers.includes(n)) remaining.push(n);
+    }
+
+    if (remaining.length > 0) {
+      const index = crypto.getRandomValues(
+        new Uint32Array(1)
+      )[0] % remaining.length;
+
+      game.drawnNumbers.push(remaining[index]);
+    }
+
+    if (game.drawnNumbers.length >= 20) {
+      for (const ticket of game.tickets) {
+        ticket.matches = ticket.numbers.filter(
+          n => game.drawnNumbers.includes(n)
+        ).length;
+
+        ticket.reward =
+          REWARDS[ticket.numbers.length]?.[ticket.matches] || 0;
+
+        const player = game.players[ticket.playerId];
+
+        if (player) {
+          player.coins += ticket.reward;
+        }
+      }
+
+      game.status = "finished";
       await this.save(game);
-      await this.ctx.storage.setAlarm(Date.now() + 1000);
+
+      // ውጤቱን ለ5 ሰከንድ አሳይ
+      await this.ctx.storage.setAlarm(Date.now() + 5000);
       return;
     }
 
-    if (game.status === "draw") {
-      const remaining = [];
-
-      for (let n = 1; n <= 80; n++) {
-        if (!game.drawnNumbers.includes(n)) remaining.push(n);
-      }
-
-      if (remaining.length > 0) {
-        const index = crypto.getRandomValues(
-          new Uint32Array(1)
-        )[0] % remaining.length;
-
-        game.drawnNumbers.push(remaining[index]);
-      }
-
-      if (game.drawnNumbers.length >= 20) {
-        for (const ticket of game.tickets) {
-          ticket.matches = ticket.numbers.filter(
-            n => game.drawnNumbers.includes(n)
-          ).length;
-
-          ticket.reward =
-            REWARDS[ticket.numbers.length]?.[ticket.matches] || 0;
-
-          const player = game.players[ticket.playerId];
-
-          if (player) {
-            player.coins += ticket.reward;
-          }
-        }
-
-        game.status = "finished";
-        await this.save(game);
-        return;
-      }
-
-      await this.save(game);
-      await this.ctx.storage.setAlarm(Date.now() + 1000);
-    }
+    await this.save(game);
+    await this.ctx.storage.setAlarm(Date.now() + 1000);
   }
+                                      }
 }
 
 export default {
