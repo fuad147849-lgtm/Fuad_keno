@@ -19,4 +19,18 @@
     }
   ]
 }
+,
+"observability": {
+  "enabled": true,
+  "head_sampling_rate": 1,
+  "logs": {
+    "enabled": true,
+    "invocation_logs": true,
+    "persist": true
+  },
+  "traces": {
+    "enabled": true,
+    "persist": true
+  }
+}
 // FUADX KENO Multiplayer configuration
