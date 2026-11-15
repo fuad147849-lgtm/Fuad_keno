@@ -167,7 +167,14 @@ function updateGrid() {
 
   const price = Number($("ticketPrice").value);
   const myTickets = tickets.filter(t => t.playerId === playerId);
-
+console.log({
+  phase,
+  selected: selected.length,
+  coins,
+  price,
+  myTickets: myTickets.length
+});
+  
   $("buyBtn").disabled =
     phase !== "select" ||
     selected.length < 1 ||
