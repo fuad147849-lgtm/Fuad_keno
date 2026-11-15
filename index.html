@@ -170,10 +170,10 @@ function updateGrid() {
 
   $("buyBtn").disabled =
     phase !== "select" ||
-    selected.length < 1
+    selected.length < 1 ||
     selected.length > 10 ||
     myTickets.length >= 10 ||
-    coins < price;
+    coins < price;      
 }
 
 function selectNumber(n) {
