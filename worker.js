@@ -77,7 +77,11 @@ async getGame() {
       method === "GET" &&
       (url.pathname === "/" || url.pathname === "/state")
     ) {
-      return reply({ success: true, game });
+      return reply({
+  success: true,
+  game,
+  alarmAt: await this.ctx.storage.getAlarm()
+});
     }
 
     if (method === "GET" && url.pathname === "/health") {
