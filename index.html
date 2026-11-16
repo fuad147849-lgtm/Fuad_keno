@@ -414,13 +414,6 @@ if (notice) {
     } else if (phase === "finished") {
       $("status").textContent = "ጨዋታው ተጠናቋል።";
     }
-
-  $("status").textContent =
-  "DEBUG: phase=" + phase +
-  " | end=" + game.selectionEndsAt +
-  " | now=" + Date.now() +
-  " | remaining=" +
-  Math.ceil((game.selectionEndsAt - Date.now()) / 1000);
  
     if (phase === "select" && game.selectionEndsAt) {
       seconds = Math.max(
