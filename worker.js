@@ -59,6 +59,10 @@ async getGame() {
   return game;
 }
 
+  async save(game) {
+  await this.ctx.storage.put("game", game);
+}
+ 
   async fetch(request) {
     const url = new URL(request.url);
     const method = request.method;
