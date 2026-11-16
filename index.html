@@ -415,6 +415,12 @@ if (notice) {
       $("status").textContent = "ጨዋታው ተጠናቋል።";
     }
 
+  console.log("TIMER DEBUG:", {
+  phase: phase,
+  end: game.selectionEndsAt,
+  now: Date.now(),
+  remaining: (game.selectionEndsAt - Date.now()) / 1000
+});
     if (phase === "select" && game.selectionEndsAt) {
       seconds = Math.max(
         0,
