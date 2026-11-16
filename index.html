@@ -128,6 +128,7 @@ let players = {};
 let phase = "waiting";
 let seconds = 0;
 let adminKey = "";
+let lastCoinRequestCount = 0;
 
 const $ = id => document.getElementById(id);
 
@@ -390,7 +391,26 @@ async function refreshGame() {
   try {
     const result = await api("/state");
     const game = result.game;
+    if (adminKey) {
+  try {
+    const requests = await api("/admin/requests", undefined, adminKey);
+    const pendingCount = (requests.requests || [])
+      .filter(r => r.status === "pending").length;
 
+    const adminButton = $("adminRequestsBtn");
+
+    if (adminButton) {
+      adminButton.textContent = pendingCount
+        ? `🔔 አዲስ ጥያቄ (${pendingCount})`
+        : "Admin: የCOIN ጥያቄዎች";
+
+      adminButton.style.background = pendingCount
+        ? "#d97706"
+        : "";
+    }
+  } catch (error) {} 
+}    
+   
     tickets = Array.isArray(game.tickets) ? game.tickets : [];
   const myRoundReward = tickets
   .filter(t => t.playerId === playerId)
@@ -529,6 +549,7 @@ coin.onclick = requestCoins;
 
   const admin = document.createElement("button");
   admin.textContent = "Admin: የCOIN ጥያቄዎች";
+  admin.id = "adminRequestsBtn";
   admin.style.margin = "5px";
   $("startBtn").insertAdjacentElement("afterend", admin);
   admin.onclick = adminRequests;
