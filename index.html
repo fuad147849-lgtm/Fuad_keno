@@ -306,8 +306,7 @@ async function requestCoins() {
   try {
     const result = await api("/coin-request", { playerId });
 
-    const coinButton = [...document.querySelectorAll("button")]
-      .find(button => button.textContent.includes("COIN ጠይቅ"));
+    const coinButton = $("coinRequestBtn");
 
     if (coinButton) {
       coinButton.textContent = "✓ COIN ተጠይቋል";
@@ -522,10 +521,11 @@ function addExtraButtons() {
   player.insertAdjacentElement("afterend", join);
 
   const coin = document.createElement("button");
-  coin.textContent = "COIN ጠይቅ";
-  coin.style.margin = "5px";
-  join.insertAdjacentElement("afterend", coin);
-  coin.onclick = requestCoins;
+coin.id = "coinRequestBtn";
+coin.textContent = "COIN ጠይቅ";
+coin.style.margin = "5px";
+join.insertAdjacentElement("afterend", coin);
+coin.onclick = requestCoins;
 
   const admin = document.createElement("button");
   admin.textContent = "Admin: የCOIN ጥያቄዎች";
