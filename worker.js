@@ -40,20 +40,24 @@ function reply(data, status = 200) {
 }
 
 export class MyDurableObject extends DurableObject {
-  async getGame() {
-    let game = await this.ctx.storage.get("game");
+  
+async getGame() {
+  let game = await this.ctx.storage.get("game");
 
-    if (!game) {
-      game = initialGame();
-      await this.ctx.storage.put("game", game);
-    }
-
+  if (!game) {
+    game = initialGame();
+    await this.ctx.storage.put("game", game);
     return game;
   }
 
-  async save(game) {
+  // የቀድሞ የጨዋታ ውሂብን ሳይሰርዝ ማዘመን
+  if (!Array.isArray(game.coinRequests)) {
+    game.coinRequests = [];
     await this.ctx.storage.put("game", game);
   }
+
+  return game;
+}
 
   async fetch(request) {
     const url = new URL(request.url);
