@@ -121,9 +121,22 @@ async getGame() {
 
     // የመጀመሪያውን ዙር Admin ያስጀምራል
     if (method === "POST" && url.pathname === "/start") {
-      if (game.status === "select" || game.status === "draw") {
-        return reply({ error: "Game already running" }, 409);
-      }
+      if (game.status === "select") {
+  game.selectionEndsAt = Date.now() + 60000;
+
+  await this.save(game);
+  await this.ctx.storage.setAlarm(game.selectionEndsAt);
+
+  return reply({
+    success: true,
+    message: "Game timer resumed",
+    game
+  });
+}
+
+if (game.status === "draw") {
+  return reply({ error: "Game already running" }, 409);
+}
 
       if (game.status === "finished") {
         game.round += 1;
