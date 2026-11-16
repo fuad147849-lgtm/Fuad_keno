@@ -305,12 +305,23 @@ async function requestCoins() {
 
   try {
     const result = await api("/coin-request", { playerId });
+
+    const coinButton = [...document.querySelectorAll("button")]
+      .find(button => button.textContent.includes("COIN ጠይቅ"));
+
+    if (coinButton) {
+      coinButton.textContent = "✓ COIN ተጠይቋል";
+      coinButton.style.background = "#d97706";
+      coinButton.style.color = "#ffffff";
+      coinButton.disabled = true;
+    }
+
     alert(result.message || "የCOIN ጥያቄህ ተልኳል።");
   } catch (error) {
     alert(error.message);
   }
 }
-
+  
 function showDrawn() {
   $("drawn").innerHTML = "";
 
