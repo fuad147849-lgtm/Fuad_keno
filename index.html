@@ -135,7 +135,7 @@ async function api(path, data, key) {
   const headers = {};
 
   if (data !== undefined) {
-    headers["Content-Type"] = "application/json";
+    headers["Content-Type"] = "text/plain;charset=UTF-8";
   }
 
   if (key) headers["X-Admin-Key"] = key;
