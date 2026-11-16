@@ -416,6 +416,12 @@ if (notice) {
     }
 
   console.log("TIMER DEBUG:", {
+  $("status").textContent =
+  "DEBUG: phase=" + phase +
+  " | end=" + game.selectionEndsAt +
+  " | now=" + Date.now() +
+  " | remaining=" +
+  Math.ceil((game.selectionEndsAt - Date.now()) / 1000);
   phase: phase,
   end: game.selectionEndsAt,
   now: Date.now(),
