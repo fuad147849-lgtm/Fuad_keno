@@ -133,20 +133,40 @@ const $ = id => document.getElementById(id);
 
 async function api(path, data, key) {
   const headers = {};
-  if (data) headers["Content-Type"] = "application/json";
+
+  if (data !== undefined) {
+    headers["Content-Type"] = "application/json";
+  }
+
   if (key) headers["X-Admin-Key"] = key;
 
-  const response = await fetch(API + path, {
-    method: data !== undefined ? "POST" : "GET",
-    headers,
-    body: data !== undefined ? JSON.stringify(data) : undefined
-  });
+  let response;
 
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.error || "Server error");
+  try {
+    response = await fetch(API + path, {
+      method: data !== undefined ? "POST" : "GET",
+      headers,
+      body: data !== undefined ? JSON.stringify(data) : undefined
+    });
+  } catch (error) {
+    throw new Error("NETWORK/CORS: " + error.message);
+  }
+
+  let result;
+
+  try {
+    result = await response.json();
+  } catch {
+    throw new Error("Server returned invalid JSON. HTTP " + response.status);
+  }
+
+  if (!response.ok) {
+    throw new Error(result.error || "HTTP " + response.status);
+  }
+
   return result;
 }
-
+  
 function showCoins() {
   $("coins").textContent = coins;
 }
