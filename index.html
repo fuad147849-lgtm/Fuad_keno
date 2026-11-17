@@ -55,7 +55,7 @@ button:disabled{opacity:.45}
   padding:8px;
 }
 .small{font-size:12px;color:#cbd1dc}
-.grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
 .num{background:#394354;color:white;padding:10px 0;text-align:center;border-radius:6px;font-size:14px;border:0;margin:0}
 .num.selected{background:#e7b936;color:#111}
 .drawgrid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
@@ -358,7 +358,7 @@ function showTickets() {
     div.className = "ticket";
 
     const name = document.createElement("div");
-    name.textContent = "ተጫዋች: " + t.name;
+    name.textContent = "Player: " + t.name;
     name.style.fontWeight = "bold";
     div.appendChild(name);
 
@@ -389,7 +389,7 @@ function showTickets() {
       " | ሽልማት: " + (t.reward || 0) + " COIN";
 
     div.appendChild(result);
-    $("tickets").appendChild(div);
+    $("tickets").prepend(div);
   });
 }
   
@@ -407,8 +407,8 @@ async function refreshGame() {
 
     if (adminButton) {
       adminButton.textContent = pendingCount
-        ? `🔔 አዲስ ጥያቄ (${pendingCount})`
-        : "Admin: የCOIN ጥያቄዎች";
+   ? `🔔 New Requests (${pendingCount})`
+       : "Admin: COIN Requests";
 
       adminButton.style.background = pendingCount
         ? "#d97706"
@@ -446,7 +446,7 @@ if (notice) {
     } else if (phase === "select") {
       $("status").textContent = "ቁጥሮችን ይምረጡ።";
     } else if (phase === "draw") {
-      $("status").textContent = "የእጣ ቁጥሮች እየወጡ ነው።";
+      $("status").textContent = "";
     } else if (phase === "finished") {
       $("status").textContent = "ጨዋታው ተጠናቋል።";
     }
@@ -541,20 +541,24 @@ function addExtraButtons() {
   const player = $("player");
 
   const join = document.createElement("button");
-  join.textContent = "ጨዋታ ተቀላቀል";
-  join.style.margin = "5px";
+  join.textContent = "Join Game";
+join.style.margin = "3px";
+join.style.padding = "6px 9px";
+join.style.fontSize = "12px";
   join.onclick = joinGame;
   player.insertAdjacentElement("afterend", join);
 
   const coin = document.createElement("button");
 coin.id = "coinRequestBtn";
-coin.textContent = "COIN ጠይቅ";
-coin.style.margin = "5px";
+coin.textContent = "Request COIN";
+coin.style.margin = "3px";
+coin.style.padding = "6px 9px";
+coin.style.fontSize = "12px";
 join.insertAdjacentElement("afterend", coin);
 coin.onclick = requestCoins;
 
   const admin = document.createElement("button");
-  admin.textContent = "Admin: የCOIN ጥያቄዎች";
+  admin.textContent = "Admin: COIN Requests";
   admin.id = "adminRequestsBtn";
   admin.style.margin = "5px";
   $("startBtn").insertAdjacentElement("afterend", admin);
