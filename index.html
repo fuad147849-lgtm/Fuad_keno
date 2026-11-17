@@ -10,9 +10,9 @@ body{margin:0;padding:10px;background:#10131b;color:white;font-family:Arial,sans
 h1{text-align:center;color:#f5c542;font-size:23px;margin:8px}
 .card{
   background:#202633;
-  padding:7px 12px;
+  padding:5px 12px;
   border-radius:12px;
-  margin:6px 0;
+  margin:4px 0;
 }
 .card{
   font-size:13px;
@@ -25,28 +25,73 @@ h1{text-align:center;color:#f5c542;font-size:23px;margin:8px}
   margin:5px 0;
   font-size:19px;
 }  
-.topline{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:nowrap}
-.topline input{width:48%;min-width:0}
+.topline{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  flex-wrap:nowrap;
+  min-height:0;
+}
+.topline input{
+  width:48%;
+  min-width:0;
+  padding:6px;
+}
 .topline div{font-size:12px}
-input{padding:10px;border:0;border-radius:7px;width:100%;background:#fff;color:#111}
+input{
+  padding:6px;
+  border:0;
+  border-radius:7px;
+  width:100%;
+  background:#fff;
+  color:#111;
+}
 button{border:0;border-radius:8px;padding:10px;background:#e7b936;color:#111;font-weight:bold;margin:4px}
 button:disabled{opacity:.45}
-.start{width:100%;font-size:17px;padding:13px}
+.start{
+  width:100%;
+  font-size:15px;
+  padding:8px;
+}
 .small{font-size:12px;color:#cbd1dc}
 .grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
 .num{background:#394354;color:white;padding:10px 0;text-align:center;border-radius:6px;font-size:14px;border:0;margin:0}
 .num.selected{background:#e7b936;color:#111}
 .drawgrid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
-.draw{background:#394354;color:white;padding:9px 0;text-align:center;border-radius:6px;font-weight:bold}
+.draw{
+  background:#394354;
+  color:white;
+  padding:6px 0;
+  text-align:center;
+  border-radius:6px;
+  font-weight:bold;
+  font-size:12px;
+}
 .draw.hit,.num.hit,.ticketnum.hit{
   background:#20a66a;
   color:white;
 }
-.ticket{background:#303b4d;padding:10px;border-radius:8px;margin:8px 0}
+.ticket{
+  background:#303b4d;
+  padding:7px;
+  border-radius:8px;
+  margin:5px 0;
+}
 .ticketnums{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
-.ticketnum{background:#48566b;padding:7px 9px;border-radius:5px;font-size:13px}
+.ticketnum{
+  background:#48566b;
+  padding:5px 7px;
+  border-radius:5px;
+  font-size:12px;
+}
 .result{color:#65e6a1;font-weight:bold}
-#status{font-weight:bold;color:#f5c542}
+#status{
+  font-weight:bold;
+  color:#f5c542;
+  font-size:12px;
+  margin:4px 0;
+}
 .details{font-size:11px;color:#d8deea;line-height:1.4}
 </style>
 </head>
@@ -60,7 +105,7 @@ button:disabled{opacity:.45}
     <input id="player" placeholder="የተጫዋች ስም">
     <div>COIN: <b id="coins">0</b></div>
   </div>
-  <div class="topline" style="margin-top:12px">
+  <div class="topline" style="margin-top:5px">
   <div>የቲኬት ዋጋ:
   <select id="ticketPrice">
     <option value="2">2</option>
