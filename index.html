@@ -141,8 +141,8 @@ button:disabled{opacity:.45}
     <p class="small">ገና ቲኬት አልተገዛም።</p>
   </div>
 </div>
-<div class="card">
-  የዚህ ዙር ሽልማት: <b id="myRoundReward">0</b> COIN
+<div class="card" id="roundReward">
+  Round Reward: <b id="myRoundReward">0</b> COIN
 </div>
 <script>
 const API = "https://fuadx-keno-multiplayer.fuad147849.workers.dev";
@@ -583,7 +583,16 @@ coin.onclick = requestCoins;
   admin.textContent = "Admin: COIN Requests";
   admin.id = "adminRequestsBtn";
   admin.style.margin = "5px";
-  $("startBtn").insertAdjacentElement("afterend", admin);
+  const reward = $("roundReward");
+const adminRow = document.createElement("div");
+adminRow.style.display = "flex";
+adminRow.style.alignItems = "center";
+adminRow.style.gap = "5px";
+adminRow.style.flexWrap = "wrap";
+
+$("startBtn").insertAdjacentElement("afterend", adminRow);
+adminRow.appendChild(admin);
+adminRow.appendChild(reward);
   admin.onclick = adminRequests;
 }
 
