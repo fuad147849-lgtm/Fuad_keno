@@ -117,10 +117,38 @@ button:disabled{opacity:.45}
     </div>
     <div>Time Left: <b id="timer">--</b></div>
   </div>
-</div>
   
 </div>
-
+<!-- ጨዋታ ማስጀመሪያ -->
+<div class="card">
+  <button class="start" id="startBtn" onclick="startGame()">ጨዋታ አስጀምር</button>
+  <p id="status">ጨዋታውን ለመጀመር ይጫኑ።</p>
+</div>
+<!-- የወጡ 20 ቁጥሮች -->
+<div class="card">
+  <b>የወጡት 20 ቁጥሮች</b>
+  <p class="small">ከተጫዋቾች ቲኬት ጋር የተመሳሰሉት ብቻ አረንጓዴ ይሆናሉ።</p>
+  <div class="drawgrid" id="drawn"></div>
+</div>
+<!-- 80 ቁጥሮች -->
+<div class="card">
+  <b>ከ1 እስከ 80 ቁጥሮች ይምረጡ</b>
+  <p class="small">ከ1 እስከ 10 ቁጥሮች ይምረጡ።</p>
+  <div class="grid" id="numbers"></div>
+  <p>የመረጡት ቁጥር: <b id="chosen">0</b></p>
+  <button id="buyBtn" onclick="buyTicket()" disabled>ቲኬት ይግዙ (2 COIN)</button>
+  <button onclick="clearSelection()">ምርጫ አጽዳ</button>
+</div>
+<!-- የተጫዋቾች ቲኬቶች -->
+<div class="card">
+  <b>የተጫዋች ቲኬቶች</b>
+  <div id="tickets">
+    <p class="small">ገና ቲኬት አልተገዛም።</p>
+  </div>
+</div>
+<div class="card">
+  የዚህ ዙር ሽልማት: <b id="myRoundReward">0</b> COIN
+</div>
 <script>
 const API = "https://fuadx-keno-multiplayer.fuad147849.workers.dev";
 
