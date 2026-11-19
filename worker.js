@@ -22,9 +22,10 @@ function initialGame() {
     status: "waiting",
     players: {},
     tickets: [],
-    drawnNumbers: [],
-    selectionEndsAt: null,
-    coinRequests: []
+   drawnNumbers: [],
+selectionEndsAt: null,
+drawStartedAt: null,
+coinRequests: [] 
   };
 }
 
@@ -143,9 +144,10 @@ if (game.status === "draw") {
       }
 
       game.status = "select";
-      game.tickets = [];
-      game.drawnNumbers = [];
-      game.selectionEndsAt = Date.now() + 60000;
+game.tickets = [];
+game.drawnNumbers = [];
+game.drawStartedAt = null;
+game.selectionEndsAt = Date.now() + 60000;
 
       await this.save(game);
       await this.ctx.storage.setAlarm(game.selectionEndsAt);
@@ -314,9 +316,10 @@ if (game.status === "draw") {
     // Admin: ጨዋታውን ዳግም ማቆም
     if (method === "POST" && url.pathname === "/reset") {
       game.status = "waiting";
-      game.tickets = [];
-      game.drawnNumbers = [];
-      game.selectionEndsAt = null;
+game.tickets = [];
+game.drawnNumbers = [];
+game.selectionEndsAt = null;
+game.drawStartedAt = null;
 
       await this.save(game);
       await this.ctx.storage.deleteAlarm();
@@ -332,12 +335,13 @@ if (game.status === "draw") {
 
     // የምርጫ ጊዜ ሲያበቃ ዕጣ ማውጣት ይጀምራል
     if (game.status === "select") {
-      game.status = "draw";
-      game.selectionEndsAt = null;
+  game.status = "draw";
+  game.selectionEndsAt = null;
+  game.drawStartedAt = Date.now();
 
-      await this.save(game);
-      await this.ctx.storage.setAlarm(Date.now() + 1000);
-      return;
+  await this.save(game);
+  await this.ctx.storage.setAlarm(Date.now() + 1000);
+  return;
     }
 
     // 20 ቁጥሮችን አንድ በአንድ ማውጣት
@@ -392,11 +396,12 @@ if (game.status === "draw") {
 
     // ቀጣይ ዙር በራሱ ይጀምራል
     if (game.status === "finished") {
-      game.round += 1;
-      game.status = "select";
-      game.tickets = [];
-      game.drawnNumbers = [];
-      game.selectionEndsAt = Date.now() + 60000;
+  game.round += 1;
+  game.status = "select";
+  game.tickets = [];
+  game.drawnNumbers = [];
+  game.drawStartedAt = null;
+  game.selectionEndsAt = Date.now() + 60000;
 
       await this.save(game);
       await this.ctx.storage.setAlarm(game.selectionEndsAt);
