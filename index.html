@@ -515,16 +515,21 @@ if (notice) {
       $("status").textContent = "ጨዋታው ተጠናቋል።";
     }
  
-    if (phase === "select" && game.selectionEndsAt) {
-      seconds = Math.max(
-        0,
-        Math.ceil((game.selectionEndsAt - Date.now()) / 1000)
-      );
-    } else {
-      seconds = 0;
-    }
+   if (phase === "select" && game.selectionEndsAt) {
+  seconds = Math.max(
+    0,
+    Math.ceil((game.selectionEndsAt - Date.now()) / 1000)
+  );
+} else if (phase === "draw" && game.drawStartedAt) {
+  seconds = Math.max(
+    0,
+    Math.ceil((game.drawStartedAt + 20000 - Date.now()) / 1000)
+  );
+} else {
+  seconds = 0;
+}
 
-    $("timer").textContent = seconds;
+$("timer").textContent = seconds; 
 
     showDrawn();
     showTickets();
