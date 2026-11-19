@@ -7,13 +7,26 @@
 <title>FUADX KENO V2</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;padding:10px;background:#10131b;color:white;font-family:Arial,sans-serif}
-h1{text-align:center;color:#f5c542;font-size:23px;margin:8px}
+body{
+  margin:0;
+  padding:5px;
+  background:linear-gradient(180deg,#071426 0%,#102b49 50%,#071426 100%);
+  color:white;
+  font-family:Arial,sans-serif;
+}
+h1{
+  text-align:center;
+  color:#f5c542;
+  font-size:21px;
+  margin:5px 0;
+  text-shadow:0 0 8px #d99b20;
+  letter-spacing:1px;
+}
 .card{
   background:#202633;
-  padding:5px 12px;
-  border-radius:12px;
-  margin:4px 0;
+  padding:3px 10px;
+  border-radius:10px;
+  margin:2px 0;
 }
 .card{
   font-size:13px;
@@ -51,38 +64,58 @@ input{
 button{border:0;border-radius:8px;padding:10px;background:#e7b936;color:#111;font-weight:bold;margin:4px}
 button:disabled{opacity:.45}
 .start{
-  width:100%;
-  font-size:15px;
-  padding:8px;
+  width:70%;
+  font-size:13px;
+  padding:5px;
+  display:block;
+  margin:0 auto;
 }
 .small{font-size:12px;color:#cbd1dc}
 .grid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
-.num{background:#394354;color:white;padding:10px 0;text-align:center;border-radius:6px;font-size:14px;border:0;margin:0}
-.num.selected{background:#e7b936;color:#111}
+.num{
+  background:#263b55;
+  color:white;
+  padding:10px 0;
+  text-align:center;
+  border-radius:6px;
+  font-size:14px;
+  border:0;
+  margin:0;
+}
+.num.selected{
+  background:#f5c542;
+  color:#071426;
+  box-shadow:0 0 5px #f5c542;
+                                                }
 .drawgrid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
 .draw{
-  background:#394354;
+  background:#263b55;
   color:white;
   padding:6px 0;
   text-align:center;
   border-radius:6px;
   font-weight:bold;
   font-size:12px;
+  border:1px solid #3d5878;
 }
 .draw.hit,.num.hit,.ticketnum.hit{
-  background:#20a66a;
+  background:#16a36a;
   color:white;
+  box-shadow:0 0 4px #16a36a;
 }
 .ticket{
-  background:#303b4d;
-  padding:7px;
+  background:#1c3048;
+  padding:6px;
+  border:1px solid #34516f;
   border-radius:8px;
-  margin:5px 0;
+  margin:4px 0;
 }
 .ticketnums{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
 .ticketnum{
-  background:#48566b;
+  background:#294563;
+  color:white;
   padding:5px 7px;
+  border:1px solid #3d5d7d;
   border-radius:5px;
   font-size:12px;
 }
