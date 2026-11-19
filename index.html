@@ -616,21 +616,40 @@ coin.style.fontSize = "12px";
 join.insertAdjacentElement("afterend", coin);
 coin.onclick = requestCoins;
 
-  const admin = document.createElement("button");
-  admin.textContent = "Admin: ብር Requests";
-  admin.id = "adminRequestsBtn";
-  admin.style.margin = "5px";
-  const reward = $("roundReward");
+ const admin = document.createElement("button");
+admin.textContent = "Admin: ብር Requests";
+admin.id = "adminRequestsBtn";
+
+const startBtn = $("startBtn");
+const reward = $("roundReward");
+const playerCard = $("player").closest(".card");
+
 const adminRow = document.createElement("div");
 adminRow.style.display = "flex";
 adminRow.style.alignItems = "center";
 adminRow.style.gap = "5px";
-adminRow.style.flexWrap = "wrap";
+adminRow.style.flexWrap = "nowrap";
+adminRow.style.width = "100%";
+adminRow.style.marginTop = "6px";
 
-$("startBtn").insertAdjacentElement("afterend", adminRow);
+[startBtn, admin].forEach(btn => {
+  btn.style.flex = "1";
+  btn.style.width = "50%";
+  btn.style.minWidth = "0";
+  btn.style.height = "34px";
+  btn.style.margin = "0";
+  btn.style.padding = "5px 2px";
+  btn.style.fontSize = "12px";
+  btn.style.boxSizing = "border-box";
+});
+
+adminRow.appendChild(startBtn);
 adminRow.appendChild(admin);
-adminRow.appendChild(reward);
-  admin.onclick = adminRequests;
+playerCard.appendChild(adminRow);
+
+playerCard.insertAdjacentElement("afterend", reward);
+
+admin.onclick = adminRequests; 
 }
 
 $("ticketPrice").addEventListener("change", updateGrid);
