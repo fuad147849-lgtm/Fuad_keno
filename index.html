@@ -129,7 +129,7 @@ button:disabled{opacity:.45}
   <div class="drawgrid" id="drawn"></div>
 </div>
 <!-- 80 ቁጥሮች -->
-<div class="card">
+<div class="card" id="numberCard">
   <b>Select Numbers (1–80)</b>
   <div class="grid" id="numbers"></div>
   <p>የመረጡት ቁጥር: <b id="chosen">0</b></p>
@@ -460,6 +460,8 @@ if (notice) {
 }
     phase = game.status;
 
+   $("numberCard").style.display =
+  phase === "draw" ? "none" : "";
     if (playerId && players[playerId]) {
       coins = players[playerId].coins;
       showCoins();
