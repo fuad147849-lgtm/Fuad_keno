@@ -168,11 +168,40 @@ button:disabled{opacity:.45}
   <div class="drawgrid" id="drawn"></div>
 </div>
 <!-- 80 ቁጥሮች -->
+
 <div class="card" id="numberCard">
-  <div class="grid" id="numbers"></div>
-  <p><b id="chosen">0</b></p>
-  <button id="buyBtn" onclick="buyTicket()" disabled>ትኬት ይግዙ (2 ብር)</button>
+
+  <div class="reward-panel">
+    <div class="possible-win">
+      Possible Win
+      <b id="possibleWin">0</b>
+    </div>
+
+    <div class="reward-row">
+      <span>Match</span>
+      <div id="matchValues"></div>
+    </div>
+
+    <div class="reward-row">
+      <span>Pays</span>
+      <div id="paysValues"></div>
+    </div>
+
+    <div id="selectedSlots"></div>
+  </div>
+
+  <div class="number-panel">
+    <div class="grid" id="numbers"></div>
+  </div>
+
+  <p style="display:none"><b id="chosen">0</b></p>
+
+  <button id="buyBtn" onclick="buyTicket()" disabled>
+    Buy Ticket
+  </button>
+
 </div>
+  
 <!-- የተጫዋቾች ቲኬቶች -->
 <div class="card">
   <b>የተጫዋች ቲኬቶች</b>
