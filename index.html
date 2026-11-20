@@ -89,11 +89,16 @@ button:disabled{opacity:.45}
                                                 }
 .drawgrid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
 .draw{
+  width:30px;
+  height:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   background:#263b55;
   color:white;
-  padding:6px 0;
+  padding:0;
   text-align:center;
-  border-radius:6px;
+  border-radius:50%;
   font-weight:bold;
   font-size:12px;
   border:1px solid #3d5878;
@@ -543,7 +548,7 @@ function showDrawn() {
   drawn.forEach(n => {
     const b = document.createElement("span");
     b.textContent = n;
-    b.className = "num";
+    b.className = "draw";
 
     if (myNumbers.has(Number(n))) {
       b.classList.add("hit");
