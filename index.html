@@ -25,29 +25,26 @@ body{
 body::before{
   content:"";
   position:fixed;
-  inset:-35%;
+  inset:-15%;
   z-index:-1;
   pointer-events:none;
   border-radius:50%;
   background:
     radial-gradient(circle,
-      rgba(0,255,190,0.15),
+      rgba(0,255,190,0.12),
       transparent 18%),
     radial-gradient(circle,
-      transparent 0 80px,
-      rgba(0,220,160,0.20) 82px 85px,
-      transparent 88px 145px,
-      rgba(0,180,170,0.17) 148px 151px,
-      transparent 154px 215px,
-      rgba(0,220,160,0.14) 218px 221px,
-      transparent 224px 290px,
-      rgba(0,180,200,0.13) 293px 296px,
-      transparent 299px 370px,
-      rgba(0,220,160,0.10) 373px 376px,
-      transparent 379px);
+      transparent 0 45px,
+      rgba(0,220,160,0.16) 47px 49px,
+      transparent 52px 85px,
+      rgba(0,180,170,0.14) 88px 90px,
+      transparent 93px 125px,
+      rgba(0,220,160,0.12) 128px 130px,
+      transparent 133px 165px,
+      rgba(0,180,200,0.10) 168px 170px,
+      transparent 173px 205px);
   animation:kenoRings 55s linear infinite;
 }
-
 @keyframes kenoRings{
   from{transform:rotate(0deg)}
   to{transform:rotate(360deg)}
@@ -241,7 +238,7 @@ button:disabled{opacity:.45}
   display:flex;
   align-items:center;
   justify-content:center;
-  background:#263b55;
+  background:transparent;
   border-radius:4px;
   font-size:11px;
   font-weight:bold;
@@ -249,7 +246,7 @@ button:disabled{opacity:.45}
 }
 
 .number-panel{
-  background:#101b2b;
+  background:transparent;
   border-radius:8px;
   padding:5px;
 }
