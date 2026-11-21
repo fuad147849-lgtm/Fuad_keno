@@ -643,7 +643,22 @@ rewardLabel.textContent = "ሽልማት: " + (t.reward || 0) + " ብር";
 name.appendChild(playerLabel);
 name.appendChild(rewardLabel);
 div.appendChild(name);
+const numbersBox = document.createElement("div");
+numbersBox.className = "ticketnums";
 
+t.numbers.forEach(n => {
+  const number = document.createElement("span");
+  number.className = "ticketnum";
+
+  if (drawn.includes(n)) {
+    number.classList.add("hit");
+  }
+
+  number.textContent = n;
+  numbersBox.appendChild(number);
+});
+
+div.appendChild(numbersBox);
     const result = document.createElement("div");
     result.className = "small";
     result.style.marginTop = "6px";
