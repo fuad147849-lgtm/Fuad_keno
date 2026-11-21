@@ -350,7 +350,7 @@ button:disabled{opacity:.45}
     <p class="small">ገና ቲኬት አልተገዛም።</p>
   </div>
 </div>
-<div class="card" id="roundReward">
+<div class="card" id="roundReward" style="display:none;">
   <b id="myRoundReward">0</b>
 </div>
 </div>
@@ -662,9 +662,7 @@ div.appendChild(numbersBox);
     const result = document.createElement("div");
     result.className = "small";
     result.style.marginTop = "6px";
-    result.textContent = "ሽልማት: " + (t.reward || 0) + " COIN";
-
-    div.appendChild(result);
+    
     $("tickets").prepend(div);
   });
 }
