@@ -8,29 +8,45 @@
 <style>
 *{box-sizing:border-box}
 body{
+body{
   margin:0;
   padding:5px;
-  background:
-    radial-gradient(
-      circle at 50% 50%,
-      rgba(85,65,108,0.22),
-      transparent 55%
-    ),
-    linear-gradient(
-      135deg,
-      #100d1c 0%,
-      #29203d 50%,
-      #100d1c 100%
-    );
-  background-size:200% 200%;
+  background:#030809;
   color:white;
   font-family:Arial,sans-serif;
-  animation:purpleFlow 18s linear infinite;
+  position:relative;
+  isolation:isolate;
 }
 
-@keyframes purpleFlow{
-  0%{background-position:0% 50%}
-  100%{background-position:200% 50%}
+body::before{
+  content:"";
+  position:fixed;
+  inset:-35%;
+  z-index:-1;
+  pointer-events:none;
+  border-radius:50%;
+  background:
+    radial-gradient(circle,
+      rgba(0,255,190,0.15),
+      transparent 18%),
+    radial-gradient(circle,
+      transparent 0 80px,
+      rgba(0,220,160,0.20) 82px 85px,
+      transparent 88px 145px,
+      rgba(0,180,170,0.17) 148px 151px,
+      transparent 154px 215px,
+      rgba(0,220,160,0.14) 218px 221px,
+      transparent 224px 290px,
+      rgba(0,180,200,0.13) 293px 296px,
+      transparent 299px 370px,
+      rgba(0,220,160,0.10) 373px 376px,
+      transparent 379px);
+  animation:kenoRings 55s linear infinite;
+}
+
+@keyframes kenoRings{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
 }
 h1{
   text-align:center;
