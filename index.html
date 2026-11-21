@@ -351,7 +351,7 @@ button:disabled{opacity:.45}
   </div>
 </div>
 <div class="card" id="roundReward">
-  Round Rewards: <b id="myRoundReward">0</b> ብር
+  <b id="myRoundReward">0</b> ብር
 </div>
 </div>
 <script>
@@ -624,35 +624,30 @@ function showTickets() {
     div.className = "ticket";
 
     const name = document.createElement("div");
-    name.textContent = "Player: " + t.name;
-    name.style.fontWeight = "bold";
-    div.appendChild(name);
+name.style.display = "flex";
+name.style.alignItems = "center";
+name.style.justifyContent = "space-between";
+name.style.fontWeight = "bold";
 
-    const numbersBox = document.createElement("div");
-    numbersBox.className = "ticketnums";
+const playerName = t.name;
+const maskedName = playerName.length <= 2
+  ? playerName
+  : playerName[0] + "**" + playerName[playerName.length - 1];
 
-    const hitNumbers = t.numbers.filter(n => drawn.includes(n));
+const playerLabel = document.createElement("span");
+playerLabel.textContent = "Player: " + maskedName;
 
-    t.numbers.forEach(n => {
-      const number = document.createElement("span");
-      number.className = "ticketnum";
+const rewardLabel = document.createElement("span");
+rewardLabel.textContent = "ሽልማት: " + (t.reward || 0) + " ብር";
 
-      if (drawn.includes(n)) {
-        number.classList.add("hit");
-      }
-
-      number.textContent = n;
-      numbersBox.appendChild(number);
-    });
-
-    div.appendChild(numbersBox);
+name.appendChild(playerLabel);
+name.appendChild(rewardLabel);
+div.appendChild(name);
 
     const result = document.createElement("div");
     result.className = "small";
     result.style.marginTop = "6px";
-    result.textContent =
-      "የተመሳሰሉ: " + hitNumbers.length +
-      " | ሽልማት: " + (t.reward || 0) + " COIN";
+    result.textContent = "ሽልማት: " + (t.reward || 0) + " COIN";
 
     div.appendChild(result);
     $("tickets").prepend(div);
